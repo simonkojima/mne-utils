@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mne-utils"
+description = "Some useful accessories for mne."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+dynamic = ["version"]
+
+authors = [
+    { name = "Simon Kojima" },
+]
+
+dependencies = [
+    "numpy>=1.23",
+    "mne"
+]
+
+[project.optional-dependencies]
+docs = [
+    "sphinx",
+    "pydata-sphinx-theme",
+    "sphinx-multiversion",
+    "sphinx-gallery",
+    "numpydoc",
+]
+
+[tool.setuptools.dynamic]
+version = { attr = "mne_utils.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["mne_utils*"]
