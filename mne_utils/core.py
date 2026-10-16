@@ -1,4 +1,5 @@
 import numpy as np
+import scipy
 import mne
 
 
@@ -119,7 +120,9 @@ def round_edge(x, fs, len_transition):
 
 
 def reconstruct_raw(raw):
-    raw = mne.io.RawArray(raw.get_data(), mne.create_info(raw.ch_names, raw.info['sfreq']))
+    raw = mne.io.RawArray(
+        raw.get_data(), mne.create_info(raw.ch_names, raw.info["sfreq"])
+    )
     return raw
 
 
@@ -128,8 +131,15 @@ def concatenate_raws(raws, len_transition=0.5, delete_annot=True, reconstruct=Fa
     for idx, raw in enumerate(raws):
         raw = raw.copy()
 
-        fs = raw.info['sfreq']
-        raw.apply_function(round_edge, picks='all', n_jobs=-1, channel_wise=True, fs=fs, len_transition=len_transition)
+        fs = raw.info["sfreq"]
+        raw.apply_function(
+            round_edge,
+            picks="all",
+            n_jobs=-1,
+            channel_wise=True,
+            fs=fs,
+            len_transition=len_transition,
+        )
 
         cat_raws.append(raw)
 
@@ -138,7 +148,9 @@ def concatenate_raws(raws, len_transition=0.5, delete_annot=True, reconstruct=Fa
     N_raws = [raw.get_data().shape[1] for raw in raws]
 
     if np.sum(N_raws) != cat_raw.get_data().shape[1]:
-        raise RuntimeError("Number of samples are not same. np.sum(N_raws) != cat_raw.get_data().shape[1]")
+        raise RuntimeError(
+            "Number of samples are not same. np.sum(N_raws) != cat_raw.get_data().shape[1]"
+        )
 
     if delete_annot:
         cat_raw.annotations.delete(list(range(len(cat_raw.annotations))))
@@ -151,7 +163,7 @@ def concatenate_raws(raws, len_transition=0.5, delete_annot=True, reconstruct=Fa
         return cat_raw
 
 
-def find_bad_eog(raw, ica, threshold='max'):
+def find_bad_eog(raw, ica, threshold="max"):
     """
     Parameters
     ==========
@@ -166,8 +178,8 @@ def find_bad_eog(raw, ica, threshold='max'):
 
     # Fs = raw.info['sfreq']
 
-    raw_eog = raw.copy().pick(picks='eog')
-    raw_eeg = raw.copy().pick(picks='eeg')
+    raw_eog = raw.copy().pick(picks="eog")
+    raw_eeg = raw.copy().pick(picks="eeg")
 
     # reconstruct is needed somehow...
     # otherwise, the raw data will be cropped
@@ -184,10 +196,12 @@ def find_bad_eog(raw, ica, threshold='max'):
 
         score = list()
         for idx, ic in enumerate(IC.ch_names):
-            a = scipy.stats.pearsonr(x=np.squeeze(data_eog), y=np.squeeze(IC.get_data(picks=ic)))
+            a = scipy.stats.pearsonr(
+                x=np.squeeze(data_eog), y=np.squeeze(IC.get_data(picks=ic))
+            )
             score.append(a[0])
 
-        if threshold == 'max':
+        if threshold == "max":
             I = np.argmax(np.absolute(np.array(score)))
             indices.append(I)
         else:
